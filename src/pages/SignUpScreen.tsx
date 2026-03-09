@@ -36,7 +36,12 @@ const SignUpScreen: React.FC = () => {
                 setSuccessMsg('OTP sent to your phone number.');
             }
         } catch (err: any) {
-            setError(err.message || 'An error occurred during sign up.');
+            const message = err.message || '';
+            if (message.toLowerCase().includes('fetch')) {
+                setError('Connection Error: Failed to connect to the database. Please check your internet.');
+            } else {
+                setError(message || 'An error occurred during sign up.');
+            }
         } finally {
             setLoading(false);
         }

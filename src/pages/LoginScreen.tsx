@@ -40,7 +40,12 @@ const LoginScreen: React.FC = () => {
         // Next step would usually be an Verify OTP ui explicitly
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during sign in.');
+      const message = err.message || '';
+      if (message.toLowerCase().includes('fetch')) {
+        setError('Connection Error: Failed to connect to the database. Please check your internet or retry.');
+      } else {
+        setError(message || 'An error occurred during sign in.');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,7 +68,12 @@ const LoginScreen: React.FC = () => {
       setSuccessMsg('Password reset link sent to your email.');
       setIsForgotPassword(false);
     } catch (err: any) {
-      setError(err.message || 'An error occurred while resetting password.');
+      const message = err.message || '';
+      if (message.toLowerCase().includes('fetch')) {
+        setError('Connection Error: Failed to connect to the database. Please check your internet.');
+      } else {
+        setError(message || 'An error occurred while resetting password.');
+      }
     } finally {
       setLoading(false);
     }
