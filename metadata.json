@@ -1,0 +1,7 @@
+{
+  "name": "Remix: muntazir travells",
+  "description": "A premium, multi-step checkout flow designed for high-end travel and luxury services.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
