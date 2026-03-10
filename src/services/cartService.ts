@@ -1,5 +1,4 @@
 import { Package } from '../data/packages';
-import { supabase } from '../lib/supabase';
 
 export interface CartItem extends Package {
   quantity: number;
@@ -16,20 +15,21 @@ export const cartService = {
   },
 
   async loadCart() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
+    const session = localStorage.getItem('simulated_session');
+    if (!session) {
       memoryCart = [];
       cartService.notifyListeners();
       return;
     }
-    const { data } = await supabase
-      .from('user_data')
-      .select('cart')
-      .eq('user_id', session.user.id)
-      .single();
 
-    if (data?.cart) {
-      memoryCart = Array.isArray(data.cart) ? data.cart : JSON.parse(data.cart);
+    const storedCart = localStorage.getItem('simulated_cart');
+    if (storedCart) {
+      try {
+        memoryCart = JSON.parse(storedCart);
+      } catch (e) {
+        console.error("Failed to parse simulated cart", e);
+        memoryCart = [];
+      }
     } else {
       memoryCart = [];
     }
@@ -38,9 +38,9 @@ export const cartService = {
   },
 
   async syncCart() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return;
-    await supabase.from('user_data').upsert({ user_id: session.user.id, cart: memoryCart }, { onConflict: 'user_id' });
+    const session = localStorage.getItem('simulated_session');
+    if (!session) return;
+    localStorage.setItem('simulated_cart', JSON.stringify(memoryCart));
   },
 
   notifyListeners() {

@@ -21,9 +21,16 @@ import {
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion } from 'motion/react';
+import { useAuth } from '../context/AuthContext';
 
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const menuItems = [
     {
@@ -89,8 +96,10 @@ const ProfileScreen: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="flex-1"
           >
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Sahinur Molla</h1>
-            <p className="text-slate-500 text-xs font-medium mb-3">sahinurmolla190@gmail.com</p>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">
+              {user?.user_metadata?.full_name || 'Traveler'}
+            </h1>
+            <p className="text-slate-500 text-xs font-medium mb-3">{user?.email || 'traveler@example.com'}</p>
 
             <div className="flex gap-4">
               <div className="flex flex-col">
@@ -157,6 +166,7 @@ const ProfileScreen: React.FC = () => {
         <div className="px-6 mt-6">
           <motion.button
             variants={itemVariants}
+            onClick={handleLogout}
             className="flex w-full items-center gap-4 bg-white border border-rose-100 px-6 py-4 rounded-2xl active:scale-[0.98] transition-all group"
           >
             <div className="text-rose-600 flex items-center justify-center rounded-xl bg-rose-50 shrink-0 size-9 group-hover:rotate-12 transition-transform">

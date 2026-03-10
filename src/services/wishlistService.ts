@@ -1,5 +1,3 @@
-import { supabase } from '../lib/supabase';
-
 export interface WishlistItem {
   id: number;
   title: string;
@@ -18,20 +16,21 @@ export const wishlistService = {
   },
 
   loadWishlist: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
+    const session = localStorage.getItem('simulated_session');
+    if (!session) {
       memoryWishlist = [];
       window.dispatchEvent(new Event('wishlist-updated'));
       return;
     }
-    const { data } = await supabase
-      .from('user_data')
-      .select('wishlist')
-      .eq('user_id', session.user.id)
-      .single();
 
-    if (data?.wishlist) {
-      memoryWishlist = Array.isArray(data.wishlist) ? data.wishlist : JSON.parse(data.wishlist);
+    const storedWishlist = localStorage.getItem('simulated_wishlist');
+    if (storedWishlist) {
+      try {
+        memoryWishlist = JSON.parse(storedWishlist);
+      } catch (e) {
+        console.error("Failed to parse simulated wishlist", e);
+        memoryWishlist = [];
+      }
     } else {
       memoryWishlist = [];
     }
@@ -40,9 +39,9 @@ export const wishlistService = {
   },
 
   syncWishlist: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return;
-    await supabase.from('user_data').upsert({ user_id: session.user.id, wishlist: memoryWishlist }, { onConflict: 'user_id' });
+    const session = localStorage.getItem('simulated_session');
+    if (!session) return;
+    localStorage.setItem('simulated_wishlist', JSON.stringify(memoryWishlist));
   },
 
   addToWishlist: async (item: WishlistItem) => {

@@ -9,6 +9,8 @@ interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     signOut: () => Promise<void>;
+    signIn: (email: string) => Promise<void>;
+    signUp: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,7 +18,27 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     isLoading: true,
     signOut: async () => { },
+    signIn: async () => { },
+    signUp: async () => { },
 });
+
+// Dummy user for simulation
+const MOCK_USER: User = {
+    id: 'b6360fb9-7f0d-41aa-b7b5-e05b5682cb34',
+    email: 'user@example.com',
+    app_metadata: {},
+    user_metadata: { full_name: 'Traveler' },
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+};
+
+const MOCK_SESSION: Session = {
+    access_token: 'mock-token',
+    refresh_token: 'mock-refresh-token',
+    expires_in: 3600,
+    token_type: 'bearer',
+    user: MOCK_USER,
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
@@ -24,37 +46,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-            if (session) {
+        // Load simulated session from local storage
+        const storedSession = localStorage.getItem('simulated_session');
+        if (storedSession) {
+            try {
+                const parsedSession = JSON.parse(storedSession);
+                setSession(parsedSession);
+                setUser(parsedSession.user);
                 cartService.loadCart();
                 wishlistService.loadWishlist();
+            } catch (e) {
+                console.error("Failed to parse simulated session", e);
             }
-        }).catch(() => {
-            setIsLoading(false);
-        });
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-            if (session) {
-                cartService.loadCart();
-                wishlistService.loadWishlist();
-            }
-        });
-
-        return () => subscription.unsubscribe();
+        }
+        setIsLoading(false);
     }, []);
 
+    const signIn = async (email: string) => {
+        setIsLoading(true);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const mockUser = { ...MOCK_USER, email };
+        const mockSession = { ...MOCK_SESSION, user: mockUser };
+
+        setSession(mockSession);
+        setUser(mockUser);
+        localStorage.setItem('simulated_session', JSON.stringify(mockSession));
+
+        cartService.loadCart();
+        wishlistService.loadWishlist();
+        setIsLoading(false);
+    };
+
+    const signUp = async (email: string) => {
+        await signIn(email); // For simulation, sign up is same as login
+    };
+
     const signOut = async () => {
-        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        localStorage.removeItem('simulated_session');
     };
 
     return (
-        <AuthContext.Provider value={{ session, user, isLoading, signOut }}>
+        <AuthContext.Provider value={{ session, user, isLoading, signOut, signIn, signUp }}>
             {children}
         </AuthContext.Provider>
     );

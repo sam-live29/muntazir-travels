@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,29 +24,17 @@ const LoginScreen: React.FC = () => {
 
     try {
       if (method === 'email') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-
-        // Let the AuthContext handle navigation via state changes, or explicitly redirect
+        await signIn(email);
         navigate('/home');
       } else {
-        const { error: signInError } = await supabase.auth.signInWithOtp({
-          phone: `+91${phone}`, // Hardcoded to India for now as per current UI
-        });
-        if (signInError) throw signInError;
-        setSuccessMsg('OTP sent to your phone number.');
-        // Next step would usually be an Verify OTP ui explicitly
+        // Simulate phone OTP
+        setSuccessMsg('OTP sent to your phone number (simulated).');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await signIn(`${phone}@phone.com`);
+        navigate('/home');
       }
     } catch (err: any) {
-      const message = err.message || '';
-      if (message.toLowerCase().includes('fetch')) {
-        setError('Connection Error: Failed to connect to the database. Please check your internet or retry.');
-      } else {
-        setError(message || 'An error occurred during sign in.');
-      }
+      setError(err.message || 'An error occurred during sign in.');
     } finally {
       setLoading(false);
     }
@@ -61,32 +50,26 @@ const LoginScreen: React.FC = () => {
     setSuccessMsg('');
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
-      });
-      if (error) throw error;
-      setSuccessMsg('Password reset link sent to your email.');
+      // Simulate reset password
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setSuccessMsg('Password reset link sent to your email (simulated).');
       setIsForgotPassword(false);
     } catch (err: any) {
-      const message = err.message || '';
-      if (message.toLowerCase().includes('fetch')) {
-        setError('Connection Error: Failed to connect to the database. Please check your internet.');
-      } else {
-        setError(message || 'An error occurred while resetting password.');
-      }
+      setError(err.message || 'An error occurred while resetting password.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-      });
-      if (error) throw error;
+      await signIn('google-user@example.com');
+      navigate('/home');
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

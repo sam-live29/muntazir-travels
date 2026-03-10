@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const SignUpScreen: React.FC = () => {
     const navigate = useNavigate();
+    const { signUp } = useAuth();
     const [method, setMethod] = useState<'email' | 'phone'>('email');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -22,39 +23,31 @@ const SignUpScreen: React.FC = () => {
 
         try {
             if (method === 'email') {
-                const { error: signUpError } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                if (signUpError) throw signUpError;
-                setSuccessMsg('Check your email to confirm your account.');
+                await signUp(email);
+                setSuccessMsg('Account created successfully (simulated).');
+                setTimeout(() => navigate('/home'), 1500);
             } else {
-                const { error: signUpError } = await supabase.auth.signInWithOtp({
-                    phone: `+91${phone}`, // Hardcoded to India for now as per current UI
-                });
-                if (signUpError) throw signUpError;
-                setSuccessMsg('OTP sent to your phone number.');
+                setSuccessMsg('OTP sent to your phone number (simulated).');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await signUp(`${phone}@phone.com`);
+                navigate('/home');
             }
         } catch (err: any) {
-            const message = err.message || '';
-            if (message.toLowerCase().includes('fetch')) {
-                setError('Connection Error: Failed to connect to the database. Please check your internet.');
-            } else {
-                setError(message || 'An error occurred during sign up.');
-            }
+            setError(err.message || 'An error occurred during sign up.');
         } finally {
             setLoading(false);
         }
     };
 
     const handleGoogleSignIn = async () => {
+        setLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-            });
-            if (error) throw error;
+            await signUp('google-user@example.com');
+            navigate('/home');
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 

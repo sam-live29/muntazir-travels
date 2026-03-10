@@ -121,7 +121,7 @@ const HeroBanners: React.FC = () => {
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       <div className="relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-[4px] md:border-[6px] border-white shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] bg-white">
-        <div className="absolute inset-y-0 left-4 md:left-6 z-20 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-4 md:left-20 z-20 flex items-center pointer-events-none">
           <button
             onClick={() => scroll('left')}
             className="size-10 md:size-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border border-white/20 hover:bg-white hover:text-slate-900 active:scale-95 transition-all pointer-events-auto opacity-0 group-hover:opacity-100"
@@ -130,7 +130,7 @@ const HeroBanners: React.FC = () => {
           </button>
         </div>
 
-        <div className="absolute inset-y-0 right-4 md:right-6 z-20 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 right-4 md:right-20 z-20 flex items-center pointer-events-none">
           <button
             onClick={() => scroll('right')}
             className="size-10 md:size-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border border-white/20 hover:bg-white hover:text-slate-900 active:scale-95 transition-all pointer-events-auto opacity-0 group-hover:opacity-100"

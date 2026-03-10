@@ -25,7 +25,6 @@ import GalleryScreen from './pages/GalleryScreen';
 import GalleryUpload from './pages/GalleryUpload';
 import BlogsScreen from './pages/BlogsScreen';
 import BlogDetailsScreen from './pages/BlogDetailsScreen';
-import NotFound from './pages/NotFound';
 
 // New Checkout Flow
 import { CheckoutProvider } from './context/CheckoutContext';
@@ -98,7 +97,7 @@ export default function App() {
               <Route path="/blog/:id" element={<BlogDetailsScreen />} />
               {/* Fallback for other routes */}
             </Route>
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </CheckoutProvider>
